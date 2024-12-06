@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	// "github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type items struct {
@@ -15,14 +18,17 @@ type items struct {
 	Price            string `json:"price"`
 }
 type receipt struct {
-	Retailer     string  `json:"retailer"`
-	PurchaseDate string  `json:"purchaseDate"`
-	PurchaseTime string  `json:"purchaseTime"`
-	Total        string  `json:"total"`
-	Items        []items `json:"items"`
+	Retailer     string    `json:"retailer"`
+	PurchaseDate string    `json:"purchaseDate"`
+	PurchaseTime string    `json:"purchaseTime"`
+	Total        string    `json:"total"`
+	Items        []items   `json:"items"`
+	Id           uuid.UUID `json:"id"`
+	Points       int       `json:"points"`
 }
 
 func main() {
+	//get json file of receipt
 	receiptInfo, err := os.ReadFile("./examples/Test1.json")
 	if err != nil {
 		fmt.Println(err)
@@ -35,10 +41,36 @@ func main() {
 		fmt.Println(marshErr)
 	}
 
-	calculatePoints(receiptData)
+	fmt.Println(receiptData)
+	//calculate the points earned for the purchase
+	var totalPoints = calculatePoints(receiptData)
+	// fmt.Println(totalPoints)
+
+	//create uuid
+	id := uuid.New()
+	receiptData.Id = id
+	receiptData.Points = totalPoints
+
+	fmt.Println(receiptData)
+
+	// router := gin.Default()
+	// router.Run("localhost:9090")
+	//pass in uuid and total points into POST call
+	//GET points by passing in the same UUID into the GET call
 }
 
-func calculatePoints(receiptData receipt) {
+// POST process receipts
+// func POST_RECEIPT(context *gin.Context) {
+
+// }
+
+// GET points
+// func GET_POINTS(context *gin.Context) {
+
+// }
+
+// Point calculation functions
+func calculatePoints(receiptData receipt) int {
 	var points = 0
 	points += countChars(receiptData.Retailer)
 	points += PointsFromTotal(receiptData.Total)
@@ -47,7 +79,7 @@ func calculatePoints(receiptData receipt) {
 	points += PointsFromNumberOfItems(len(receiptData.Items))
 	points += TrimmedLengthPoints(receiptData.Items)
 
-	fmt.Println("Total Points:", points)
+	return points
 }
 
 func countChars(retailer string) int {
@@ -58,7 +90,7 @@ func countChars(retailer string) int {
 			count++
 		}
 	}
-	fmt.Println("countChars points: ", count)
+	// fmt.Println("countChars points: ", count)
 	return count
 }
 
@@ -72,12 +104,12 @@ func PointsFromTotal(total string) int {
 	if totalInt%25 == 0 {
 		points += 25
 	}
-	fmt.Println("Points From Total: ", points)
+	// fmt.Println("Points From Total: ", points)
 	return points
 }
 
 func PointsFromNumberOfItems(numItems int) int {
-	fmt.Println("Number of items points: ", (numItems/2)*5)
+	// fmt.Println("Number of items points: ", (numItems/2)*5)
 	return (numItems / 2) * 5
 }
 
@@ -96,26 +128,26 @@ func TrimmedLengthPoints(items []items) int {
 			points += int(lengthPoints)
 		}
 	}
-	fmt.Println("Length points: ", points)
+	// fmt.Println("Length points: ", points)
 	return points
 }
 
 func purchaseDatePoints(date string) int {
 	dayDigit, _ := strconv.Atoi(date[len(date)-1:])
 	if dayDigit%2 == 1 {
-		fmt.Println("Date points: ", 6)
+		// fmt.Println("Date points: ", 6)
 		return 6
 	}
-	fmt.Println("Date points: ", 0)
+	// fmt.Println("Date points: ", 0)
 	return 0
 }
 
 func purchaseTimePoints(time string) int {
 	timeInt, _ := strconv.Atoi(strings.ReplaceAll(time, ":", ""))
 	if (timeInt > 1400) && (timeInt < 1600) {
-		fmt.Println("Time points: ", 10)
+		// fmt.Println("Time points: ", 10)
 		return 10
 	}
-	fmt.Println("Time points: ", 0)
+	// fmt.Println("Time points: ", 0)
 	return 0
 }
