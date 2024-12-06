@@ -35,14 +35,18 @@ func main() {
 		fmt.Println(marshErr)
 	}
 
-	var points = 0
+	calculatePoints(receiptData)
+}
 
+func calculatePoints(receiptData receipt) {
+	var points = 0
 	points += countChars(receiptData.Retailer)
 	points += PointsFromTotal(receiptData.Total)
 	points += purchaseDatePoints(receiptData.PurchaseDate)
 	points += purchaseTimePoints(receiptData.PurchaseTime)
 	points += PointsFromNumberOfItems(len(receiptData.Items))
 	points += TrimmedLengthPoints(receiptData.Items)
+
 	fmt.Println("Total Points:", points)
 }
 
