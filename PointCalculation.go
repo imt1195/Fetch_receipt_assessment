@@ -50,6 +50,8 @@ func main() {
 	receiptData.Points = totalPoints
 
 	fmt.Println(receiptData)
+	fmt.Println("Generated ID: ", receiptData.Id)
+	fmt.Println("Points: ", receiptData.Points)
 
 	router := gin.Default()
 	router.POST("/receipts/process", POST_RECEIPT)
